@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-"""Django's command-line utility for administrative tasks."""
+
+
+## refrence link for views: https://ccbv.co.uk/
 import os
 import sys
 
