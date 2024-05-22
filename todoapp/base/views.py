@@ -1,20 +1,20 @@
 from django.forms import BaseModelForm
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.urls import reverse_lazy
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from .models import Task
 
 # Create your views here.
 
 ## login view 
-
 class CustomLoginView(LoginView):
     template_name = 'base/login.html'
     fields = '__all__'
@@ -22,10 +22,33 @@ class CustomLoginView(LoginView):
 
     def get_success_url(self):
         return reverse_lazy('tasks')
+    
 
-## for testing purpose
-def new(request):
-    return HttpResponse('this is new route')
+
+class RegisterPage(FormView):
+    template_name = 'base/register.html'
+    success_url= reverse_lazy('tasks')
+    form_class = UserCreationForm
+    redirect_authenticated_user = True
+
+
+    def form_valid(self, form):
+        user = form.save()
+        if user is not None:
+            login(self.request,user)
+        return super(RegisterPage,self).form_valid(form) 
+
+    ## function login is not clear, by the this function is used to restrict user from change page by route  
+
+    # def get(self, *args, **kwargs):
+    #     if self.request.user.is_authenticated:
+    #         return redirect  
+    #     return super(RegisterPage, self).get(*args, **kwargs)
+
+    
+
+
+
 
 
 ## list view
@@ -72,3 +95,6 @@ class TaskDelete(LoginRequiredMixin,DeleteView):
     success_url= reverse_lazy('tasks')
 
 
+## for testing purpose
+def new(request):
+    return HttpResponse('this is new route')
