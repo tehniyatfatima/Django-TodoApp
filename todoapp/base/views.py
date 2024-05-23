@@ -40,10 +40,10 @@ class RegisterPage(FormView):
 
     ## function login is not clear, by the this function is used to restrict user from change page by route  
 
-    # def get(self, *args, **kwargs):
-    #     if self.request.user.is_authenticated:
-    #         return redirect  
-    #     return super(RegisterPage, self).get(*args, **kwargs)
+    def get(self, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            return redirect  
+        return super(RegisterPage, self).get(*args, **kwargs)
 
     
 
@@ -61,6 +61,25 @@ class TaskList(LoginRequiredMixin,ListView):
         context = super().get_context_data(**kwargs)
         context ['tasks'] = context ['tasks'].filter(user = self.request.user)
         context ['counts'] = context ['tasks'].filter(complete=False).count()
+
+
+        ## logic for searching bar
+        # search_input = self.request.GET.get("search-area") or " "
+        # if search_input:
+        #    context ['tasks'] = context ['tasks'].filter(title__icontains= search_input) 
+        #    context['search_input'] = search_input
+
+        search_input = self.request.GET.get("search-area", "").strip()
+        if search_input:
+            context['tasks'] = context['tasks'].filter(title__icontains=search_input)
+        
+        context['search_input'] = search_input
+
+         # Debugging output
+        print(f"User: {self.request.user}")
+        print(f"Tasks: {list(context['tasks'])}")
+        # print(f"Search input: {search_input}")
+
         return context
     
 

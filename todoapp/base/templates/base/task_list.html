@@ -18,6 +18,16 @@
 <hr>
 <a href="{% url 'createtask'  %}"> add task </a>
 
+
+<!-- search bar -->
+<form method="GET">
+    <input type="text" name="search-area" value="{{ search_input }}">
+    <input type="submit" value="search">
+</form>
+
+<!-- <p>Debug: {{ tasks }}</p> Add this line to check the tasks passed to the template -->
+
+
 <table>
     
     <tr>
