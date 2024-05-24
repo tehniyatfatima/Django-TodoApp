@@ -64,20 +64,16 @@ class TaskList(LoginRequiredMixin,ListView):
 
 
         ## logic for searching bar
-        # search_input = self.request.GET.get("search-area") or " "
-        # if search_input:
-        #    context ['tasks'] = context ['tasks'].filter(title__icontains= search_input) 
-        #    context['search_input'] = search_input
-
+       
         search_input = self.request.GET.get("search-area", "").strip()
         if search_input:
-            context['tasks'] = context['tasks'].filter(title__icontains=search_input)
+            context['tasks'] = context['tasks'].filter(title__startswith=search_input)
         
         context['search_input'] = search_input
 
          # Debugging output
-        print(f"User: {self.request.user}")
-        print(f"Tasks: {list(context['tasks'])}")
+        # print(f"User: {self.request.user}")
+        # print(f"Tasks: {list(context['tasks'])}")
         # print(f"Search input: {search_input}")
 
         return context
@@ -102,10 +98,23 @@ class TaskCreate(LoginRequiredMixin,CreateView):
 
 
 ## update task view
-class TaskUpdate(LoginRequiredMixin,UpdateView):
-     model = Task
-     fields = ['title','description','complete']
-     success_url= reverse_lazy('tasks')
+# class TaskUpdate(LoginRequiredMixin,UpdateView):
+#      model = Task
+#      fields = ['title','description','complete']
+#      success_url= reverse_lazy('tasks')
+
+
+class TaskUpdate(LoginRequiredMixin, UpdateView):
+    model = Task
+    fields = ['title', 'description', 'complete']
+    success_url = reverse_lazy('tasks')
+
+    def form_valid(self, form):
+        # Set the user for the task
+        form.instance.user = self.request.user
+
+        # Call the parent class's form_valid() method
+        return super().form_valid(form)
 
 ## delete task view
 class TaskDelete(LoginRequiredMixin,DeleteView):

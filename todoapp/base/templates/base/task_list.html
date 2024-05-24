@@ -1,48 +1,168 @@
+{% extends 'base/main.html' %}
+{% block content %}
+<style>
+    /* Styles for the header */
+    .header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 
-{% if request.user.is_authenticated  %}
-<p>{{ request.user}}</p>
-<form method="POST" action="{% url 'logout' %}">
-    {% csrf_token %}
-    <button type="submit">Logout</button>
+    .header-bar h1 {
+        margin: 0;
+    }
+
+    .header-bar button,
+    .header-bar a {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .header-bar button:hover,
+    .header-bar a:hover {
+        background-color: #45a049;
+    }
+
+    /* Styles for the todo list */
+    #todo-title {
+        margin-bottom: 10px;
+    }
+
+    #divider {
+        margin-bottom: 20px;
+    }
+
+    #add-task-link {
+        display: inline-block;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    #add-task-link:hover {
+        background-color: #0056b3;
+    }
+
+    /* Styles for the search bar */
+    #search-form {
+        margin-bottom: 20px;
+    }
+
+    #search-input {
+        padding: 8px;
+        width: 200px;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    #search-button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+
+    #search-button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Styles for the task list */
+    .task-list {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .task-list th,
+    .task-list td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .task-list th {
+        background-color: #f2f2f2;
+    }
+
+    .task-list td a {
+        color: #007bff;
+        text-decoration: none;
+        margin-right: 10px;
+    }
+
+    .task-list td a:hover {
+        text-decoration: underline;
+    }
+
+    /* Styles for status column */
+    .task-status {
+        width: 100px;
+    }
+</style>
+
+<div class="header-bar">
+    <div>
+        <h1>Hello {{ request.user|title }}</h1>
+        <h3 style="margin: 0;">You have <i>{{ counts }}</i> incomplete task{{ counts|pluralize:"s" }}</h3>
+    </div>
+
+    {% if request.user.is_authenticated %}
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+    {% else %}
+    <a href="{% url 'login'  %}">Login</a>
+    {% endif %}
+</div>
+
+<h1 id="todo-title">My Todo List</h1>
+<hr id="divider">
+<a href="{% url 'createtask' %}" id="add-task-link" class="button">Add Task</a>
+
+<!-- Search bar -->
+<form method="GET" id="search-form">
+    <input type="text" name="search-area" value="{{ search_input }}" id="search-input">
+    <input type="submit" value="Search" class="button" id="search-button">
 </form>
 
-{%else%}
-<a href="{% url 'login'  %}">logout</a>
-
-{% endif %}
-
-
- 
-<h1> My todo List</h1>
-
-<hr>
-<a href="{% url 'createtask'  %}"> add task </a>
-
-
-<!-- search bar -->
-<form method="GET">
-    <input type="text" name="search-area" value="{{ search_input }}">
-    <input type="submit" value="search">
-</form>
-
-<!-- <p>Debug: {{ tasks }}</p> Add this line to check the tasks passed to the template -->
-
-
-<table>
-    
+<table class="task-list">
     <tr>
-        <th> items</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Actions</th>
     </tr>
-
     {% for task in tasks %}
     <tr>
-        <td> {{task.title}}</td>
-        <td> <a href="{% url 'task' task.id %}">view</a></td>
-        <td> <a href="{% url 'updatetask' task.id %}">update</a></td>
-        <td> <a href="{% url 'deletetask' task.id %}">delete</a></td>
+        <td>{{ task.title }}</td>
+        <td>
+            {% if task.complete %}
+                Complete
+            {% else %}
+                Incomplete
+            {% endif %}
+        </td>
+        <td>
+            <a href="{% url 'updatetask' task.id %}">Update</a>
+            <a href="{% url 'deletetask' task.id %}">Delete</a>
+        </td>
     </tr>
-
     {% empty %}
-    <h3>no items in list</h3>
-    {% endfor%}
+    <tr>
+        <td colspan="3">No items in list</td>
+    </tr>
+    {% endfor %}
 </table>
+{% endblock content %}
