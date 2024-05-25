@@ -7,31 +7,50 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 20px;
+        padding: 20px;
+        background: linear-gradient(90deg, #4CAF50, #45a049);
+        color: white;
+        border-radius: 10px;
+    }
+
+    .header-bar h1, .header-bar h3 {
+        margin: 0;
     }
 
     .header-bar h1 {
-        margin: 0;
+        font-size: 28px;
+    }
+
+    .header-bar h3 {
+        font-size: 16px;
+        color: #e0f7e9;
     }
 
     .header-bar button,
     .header-bar a {
-        padding: 8px 16px;
+        padding: 10px 20px;
         border: none;
         border-radius: 5px;
-        background-color: #4CAF50;
-        color: white;
+        background-color: white;
+        color: #4CAF50;
         text-decoration: none;
         cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .header-bar button:hover,
     .header-bar a:hover {
-        background-color: #45a049;
+        background-color: #f1f1f1;
+        color: #45a049;
     }
 
-    /* Styles for the todo list */
+    /* Styles for the todo list title */
     #todo-title {
         margin-bottom: 10px;
+        font-size: 24px;
+        color: #333;
+        text-align: center;
     }
 
     #divider {
@@ -40,7 +59,7 @@
 
     #add-task-link {
         display: inline-block;
-        padding: 8px 16px;
+        padding: 10px 20px;
         margin-bottom: 15px;
         border: none;
         border-radius: 5px;
@@ -48,6 +67,11 @@
         color: white;
         text-decoration: none;
         cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+        display: block;
+        text-align: center;
+        margin: 0 auto 15px auto;
     }
 
     #add-task-link:hover {
@@ -57,10 +81,13 @@
     /* Styles for the search bar */
     #search-form {
         margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     #search-input {
-        padding: 8px;
+        padding: 10px;
         width: 200px;
         margin-right: 10px;
         border: 1px solid #ccc;
@@ -68,12 +95,14 @@
     }
 
     #search-button {
-        padding: 8px 16px;
+        padding: 10px 20px;
         border: none;
         border-radius: 5px;
         background-color: #007bff;
         color: white;
         cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
     }
 
     #search-button:hover {
@@ -82,41 +111,72 @@
 
     /* Styles for the task list */
     .task-list {
-        width: 100%;
-        border-collapse: collapse;
+        list-style: none;
+        padding: 0;
+        margin: 0;
     }
 
-    .task-list th,
-    .task-list td {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-        text-align: left;
+    .task-item {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
-    .task-list th {
-        background-color: #f2f2f2;
+    .task-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
-    .task-list td a {
+    .task-details {
+        flex-grow: 1;
+        margin-right: 20px;
+    }
+
+    .task-details h2 {
+        margin: 0 0 5px;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .task-details p {
+        margin: 0;
+        color: #666;
+    }
+
+    .task-actions a {
         color: #007bff;
         text-decoration: none;
-        margin-right: 10px;
+        font-weight: bold;
+        margin-left: 10px;
+        transition: color 0.3s ease;
     }
 
-    .task-list td a:hover {
-        text-decoration: underline;
+    .task-actions a:hover {
+        color: #0056b3;
     }
 
-    /* Styles for status column */
-    .task-status {
-        width: 100px;
+    .task-status.complete {
+        color: #4CAF50;
+        font-weight: bold;
+    }
+
+    .task-status.incomplete {
+        color: #f44336;
+        font-weight: bold;
     }
 </style>
 
 <div class="header-bar">
     <div>
         <h1>Hello {{ request.user|title }}</h1>
-        <h3 style="margin: 0;">You have <i>{{ counts }}</i> incomplete task{{ counts|pluralize:"s" }}</h3>
+        <h3>You have <i>{{ counts }}</i> incomplete task{{ counts|pluralize:"s" }}</h3>
     </div>
 
     {% if request.user.is_authenticated %}
@@ -125,7 +185,7 @@
         <button type="submit">Logout</button>
     </form>
     {% else %}
-    <a href="{% url 'login'  %}">Login</a>
+    <a href="{% url 'login' %}">Login</a>
     {% endif %}
 </div>
 
@@ -139,31 +199,26 @@
     <input type="submit" value="Search" class="button" id="search-button">
 </form>
 
-<table class="task-list">
-    <tr>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Actions</th>
-    </tr>
+<ul class="task-list">
     {% for task in tasks %}
-    <tr>
-        <td>{{ task.title }}</td>
-        <td>
-            {% if task.complete %}
-                Complete
-            {% else %}
-                Incomplete
-            {% endif %}
-        </td>
-        <td>
+    <li class="task-item">
+        <div class="task-details">
+            <h2>{{ task.title }}</h2>
+            <p class="task-status {% if task.complete %}complete{% else %}incomplete{% endif %}">
+                {% if task.complete %}
+                    Complete
+                {% else %}
+                    Incomplete
+                {% endif %}
+            </p>
+        </div>
+        <div class="task-actions">
             <a href="{% url 'updatetask' task.id %}">Update</a>
             <a href="{% url 'deletetask' task.id %}">Delete</a>
-        </td>
-    </tr>
+        </div>
+    </li>
     {% empty %}
-    <tr>
-        <td colspan="3">No items in list</td>
-    </tr>
+    <li>No items in the list</li>
     {% endfor %}
-</table>
+</ul>
 {% endblock content %}
